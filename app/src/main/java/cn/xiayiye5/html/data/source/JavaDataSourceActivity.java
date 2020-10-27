@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
  * 2020年10月26日09:49:48
  */
 public class JavaDataSourceActivity extends AppCompatActivity {
+   static HtmlDataBean htmlDataBean = new HtmlDataBean();
     /**
      * 下面的这个注解一定要添加
      *
@@ -42,8 +43,12 @@ public class JavaDataSourceActivity extends AppCompatActivity {
     final class MyWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
-            return true;
+            if (url.startsWith("http:") || url.startsWith("https:")) {
+                view.loadUrl(url);
+                return false;
+            } else {
+                return true;
+            }
         }
 
         @Override
@@ -61,12 +66,13 @@ public class JavaDataSourceActivity extends AppCompatActivity {
         }
     }
 
-    private String htmlData;
+    public static String htmlData;
 
-    final class InJavaScriptLocalObj {
+    static final class InJavaScriptLocalObj {
         @JavascriptInterface
         public void showSource(String html) {
             Log.e("html源码打印", html);
+            htmlDataBean.setSourceData(html);
             htmlData = html;
         }
     }
@@ -77,7 +83,10 @@ public class JavaDataSourceActivity extends AppCompatActivity {
             Toast.makeText(this, "源码数据获取失败,请退出重试！", Toast.LENGTH_SHORT).show();
             return;
         }
-        intent.putExtra("html_data", htmlData);
+        //方法一
+//        intent.putExtra("html_page", 1);
+        //方法二
+        intent.putExtra("html_data", htmlDataBean);
         startActivity(intent);
     }
 }

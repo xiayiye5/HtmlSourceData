@@ -18,6 +18,12 @@ import kotlinx.android.synthetic.main.activity_html_data_source.*
  * Kotlin版本
  */
 class KotlinDataSourceActivity : Activity() {
+    val htmlDataBean = HtmlDataBean()
+
+    companion object {
+        var htmlData: String = ""
+    }
+
     /**
      * 下面的HTML注解不能少
      */
@@ -32,10 +38,14 @@ class KotlinDataSourceActivity : Activity() {
         webViewDataSource.loadUrl(url!!)
     }
 
-    final class MyWebViewClient : WebViewClient() {
+    class MyWebViewClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-            view?.loadUrl(url!!);
-            return true
+            return if (url!!.startsWith("http:") || url.startsWith("https:")) {
+                view!!.loadUrl(url)
+                false
+            } else {
+                true
+            }
         }
 
         override fun onPageFinished(view: WebView?, url: String?) {
@@ -53,13 +63,13 @@ class KotlinDataSourceActivity : Activity() {
         }
     }
 
-    private var htmlData: String = ""
 
     //下面必须用内部内的写法，否则 htmlData这个变量在 showSource里面无法获取
     inner class InJavaScriptLocalObj {
         @JavascriptInterface
         fun showSource(html: String?) {
             Log.e("html源码打印", html!!)
+            htmlDataBean.sourceData = html
             htmlData = html
         }
     }
@@ -70,7 +80,10 @@ class KotlinDataSourceActivity : Activity() {
             Toast.makeText(this, "源码数据获取失败,请退出重试！", Toast.LENGTH_SHORT).show()
             return
         }
-        intent.putExtra("html_data", htmlData)
+        //方法一
+//        intent.putExtra("html_page", 2)
+        //方法二
+        intent.putExtra("html_data", htmlDataBean)
         startActivity(intent)
     }
 }
